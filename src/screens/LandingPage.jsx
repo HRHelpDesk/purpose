@@ -13,6 +13,7 @@ import {
   Divider,
   useTheme,
   useMediaQuery,
+  Link as MuiLink,
 } from '@mui/material';
 import {
   Instagram,
@@ -22,6 +23,10 @@ import {
   ChevronLeft,
   ChevronRight,
 } from '@mui/icons-material';
+
+import MenuIcon from '@mui/icons-material/Menu';
+import CloseIcon from '@mui/icons-material/Close';
+import Drawer from '@mui/material/Drawer';
 import logo from '../assets/purpose_logo.png';
 
 import heroImage from '../assets/images/hero.jpg'
@@ -65,15 +70,17 @@ export default function BarbershopLanding() {
   const [currentImage, setCurrentImage] = useState(0);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-  // Auto-advance every 4 seconds
-useEffect(() => {
-  const interval = setInterval(() => {
-    nextImage();
-  }, 4000);
 
-  // Cleanup when component unmounts or when we want to stop
-  return () => clearInterval(interval);
-}, [currentImage]);   // Re-run when currentImage changes → restarts timer
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  const toggleDrawer = () => setMobileOpen(!mobileOpen);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      nextImage();
+    }, 4000);
+    return () => clearInterval(interval);
+  }, [currentImage]);
 
   const nextImage = () => {
     setCurrentImage((prev) => (prev + 1) % galleryImages.length);
@@ -92,45 +99,108 @@ useEffect(() => {
 
   return (
     <Box sx={{ bgcolor: '#f5f5f5' }}>
-      {/* Enable smooth scrolling for the whole page */}
       <style>{`html { scroll-behavior: smooth; }`}</style>
 
-      {/* ─── Navigation ─────────────────────────────────────────────── */}
-      <AppBar position="sticky" sx={{ bgcolor: 'white', color: 'black', boxShadow: 2 }}>
-        <Toolbar>
-          <Typography variant="h6" sx={{ flexGrow: 1, fontWeight: 'bold', letterSpacing: 1 }}>
+      {/* Navigation */}
+      <AppBar
+        position="sticky"
+        sx={{
+          bgcolor: 'white',
+          color: 'black',
+          boxShadow: 2,
+        }}
+      >
+        <Toolbar
+          sx={{
+            position: 'relative',
+            justifyContent: 'space-between',
+            minHeight: { xs: 88, md: 64 },
+            py: { xs: 1.5, md: 0 },
+          }}
+        >
+          {isMobile && <Box sx={{ width: 40 }} />}
+
+          <Box
+            sx={{
+              position: isMobile ? 'absolute' : 'static',
+              left: isMobile ? '50%' : 'auto',
+              transform: isMobile ? 'translateX(-50%)' : 'none',
+            }}
+          >
             <Box
               component="img"
               src={logo}
               alt="Purpose Barbershop Logo"
-              sx={{ height: { xs: 48, sm: 56, md: 64 }, maxWidth: '100%', objectFit: 'contain' }}
+              sx={{
+                height: { xs: 78, md: 64 },
+                my: { xs: 1, md: 0 },
+                transition: '0.25s',
+              }}
             />
-          </Typography>
+          </Box>
 
+          {!isMobile && (
+            <Box sx={{ display: 'flex', gap: 2 }}>
+              {navItems.map((item) => (
+                <Button
+                  key={item.id}
+                  onClick={() => scrollTo(item.id)}
+                  sx={{ color: 'black', fontSize: '1rem', textTransform: 'none' }}
+                >
+                  {item.label}
+                </Button>
+              ))}
+            </Box>
+          )}
+
+          {isMobile && (
+            <IconButton edge="end" onClick={toggleDrawer}>
+              <MenuIcon fontSize="large" />
+            </IconButton>
+          )}
+        </Toolbar>
+      </AppBar>
+
+      <Drawer
+        anchor="right"
+        open={mobileOpen}
+        onClose={toggleDrawer}
+        PaperProps={{ sx: { width: 260 } }}
+      >
+        <Box sx={{ p: 3 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+            <IconButton onClick={toggleDrawer}>
+              <CloseIcon />
+            </IconButton>
+          </Box>
+          <Divider sx={{ my: 2 }} />
           {navItems.map((item) => (
             <Button
               key={item.id}
-              onClick={() => scrollTo(item.id)}
+              fullWidth
+              onClick={() => {
+                scrollTo(item.id);
+                toggleDrawer();
+              }}
               sx={{
+                justifyContent: 'flex-start',
+                fontSize: '1.1rem',
+                py: 1.5,
                 color: 'black',
-                mx: isMobile ? 0.5 : 1,
-                fontSize: isMobile ? '0.9rem' : '1rem',
-                textTransform: 'none',
               }}
             >
               {item.label}
             </Button>
           ))}
-        </Toolbar>
-      </AppBar>
+        </Box>
+      </Drawer>
 
-      {/* ─── Hero / Home ────────────────────────────────────────────── */}
+      {/* ─── Hero ────────────────────────────────────────────── */}
       <Box
         id="home"
         sx={{
           minHeight: '60vh',
-          backgroundImage:
-            `linear-gradient(rgba(0,0,0,0.45), rgba(0,0,0,0.45)), url(${heroImage})`,
+          backgroundImage: `linear-gradient(rgba(0,0,0,0.45), rgba(0,0,0,0.45)), url(${heroImage})`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           display: 'flex',
@@ -141,33 +211,63 @@ useEffect(() => {
       >
         <Container maxWidth="md">
           <Box textAlign="center" marginTop={20}>
-           
             <Link to="/booking" style={{ textDecoration: 'none' }}>
-            <Button
+              <Button
                 variant="contained"
                 size="large"
                 sx={{
-                bgcolor: 'white',
-                color: 'black',
-                px: 6,
-                py: 2,
-                fontSize: '1.2rem',
-                borderRadius: '10px !important',
-                '&:hover': { bgcolor: '#f0f0f0' },
+                  bgcolor: 'white',
+                  color: 'black',
+                  px: 6,
+                  py: 2,
+                  fontSize: '1.2rem',
+                  borderRadius: '10px !important',
+                  '&:hover': { bgcolor: '#f0f0f0' },
                 }}
-            >
+              >
                 Book Online
-            </Button>
+              </Button>
             </Link>
 
+            {/* Social Icons */}
             <Box sx={{ mt: 5, display: 'flex', justifyContent: 'center', gap: 2 }}>
-              <IconButton sx={{ color: 'white', bgcolor: 'rgba(255,255,255,0.15)' }}>
+              <IconButton
+                component="a"
+                href="https://www.instagram.com/purpose__barber.tattoo?igsh=MWE1bWN0dDFwN3h2ZA%3D%3D&utm_source=qr"
+                target="_blank"
+                rel="noopener noreferrer"
+                sx={{ color: 'white', bgcolor: 'rgba(255,255,255,0.15)' }}
+              >
                 <Instagram />
               </IconButton>
-              <IconButton sx={{ color: 'white', bgcolor: 'rgba(255,255,255,0.15)' }}>
+
+              <IconButton
+                component="a"
+                href="https://www.facebook.com/share/19cfUwoHes/?mibextid=wwXIfr"
+                target="_blank"
+                rel="noopener noreferrer"
+                sx={{ color: 'white', bgcolor: 'rgba(255,255,255,0.15)' }}
+              >
                 <Facebook />
               </IconButton>
-              <IconButton sx={{ color: 'white', bgcolor: 'rgba(255,255,255,0.15)' }}>
+
+              <IconButton
+                component="a"
+                href="https://www.tiktok.com/@purpose_barbershoptattoo?_t=ZP-8v2jpkbg16c&_r=1"
+                target="_blank"
+                rel="noopener noreferrer"
+                sx={{ color: 'white', bgcolor: 'rgba(255,255,255,0.15)' }}
+              >
+                <svg width="24" height="24" fill="white" viewBox="0 0 24 24">
+                  <path d="M21 8.06c-1.75.02-3.49-.57-4.93-1.69v7.48c0 3.36-2.73 6.1-6.1 6.1-3.36 0-6.1-2.74-6.1-6.1 0-3.36 2.74-6.1 6.1-6.1.31 0 .61.02.91.07v3.3c-.3-.08-.6-.12-.91-.12-1.53 0-2.77 1.25-2.77 2.77 0 1.53 1.24 2.77 2.77 2.77s2.77-1.24 2.77-2.77V2h3.23c.24 2.16 1.96 3.91 4.11 4.17v1.89z"/>
+                </svg>
+              </IconButton>
+
+              <IconButton
+                component="a"
+                href="mailto:swaycutz2323@yahoo.com"
+                sx={{ color: 'white', bgcolor: 'rgba(255,255,255,0.15)' }}
+              >
                 <Mail />
               </IconButton>
             </Box>
@@ -178,16 +278,7 @@ useEffect(() => {
       {/* ─── Contact ────────────────────────────────────────────────── */}
       <Box id="contact" sx={{ bgcolor: 'white', py: 10 }}>
         <Container maxWidth="md">
-          <Typography
-            variant="h2"
-            align="center"
-            sx={{
-              fontWeight: 'bold',
-              mb: 6,
-              fontSize: { xs: '2.8rem', md: '4.5rem' },
-              letterSpacing: 2,
-            }}
-          >
+          <Typography variant="h2" align="center" sx={{ fontWeight: 'bold', mb: 6 }}>
             CONTACT US
           </Typography>
 
@@ -204,7 +295,21 @@ useEffect(() => {
               <Typography variant="h5" gutterBottom fontWeight="bold" align="center">
                 Phone
               </Typography>
-              <Typography align="center" sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
+              <Typography
+                component="a"
+                href="tel:18064191028"
+                align="center"
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 1,
+                  color: 'inherit',
+                  textDecoration: 'none',
+                  fontSize: '1.1rem',
+                  '&:hover': { textDecoration: 'underline' },
+                }}
+              >
                 <Phone fontSize="small" />
                 806-419-1028
               </Typography>
@@ -213,7 +318,8 @@ useEffect(() => {
         </Container>
       </Box>
 
-      {/* ─── Location / Map ─────────────────────────────────────────── */}
+      {/* The rest remains unchanged: Location, About, Gallery, Footer */}
+      {/* ─── Location ───────────────────────────────────────────────── */}
       <Box id="location" sx={{ bgcolor: '#1a1a1a', color: 'white', py: 10 }}>
         <Container maxWidth="lg">
           <Typography
@@ -228,11 +334,7 @@ useEffect(() => {
             OUR LOCATION
           </Typography>
 
-          <Typography
-            variant="h5"
-            align="center"
-            sx={{ mb: 5, lineHeight: 1.5 }}
-          >
+          <Typography variant="h5" align="center" sx={{ mb: 5, lineHeight: 1.5 }}>
             2301 N Hobart St<br />
             Pampa, TX 79065
           </Typography>
@@ -308,86 +410,82 @@ useEffect(() => {
       </Box>
 
       {/* ─── Gallery ────────────────────────────────────────────────── */}
-      {/* ─── Gallery ────────────────────────────────────────────────── */}
-<Box id="gallery" sx={{ bgcolor: '#1a1a1a', color: 'white', py: 10 }}>
-  <Container maxWidth="lg">
-    <Box
-      sx={{
-        position: 'relative',
-        maxWidth: 540,
-        mx: 'auto',
-        aspectRatio: '1080 / 1350',
-        borderRadius: 3,
-        overflow: 'hidden',
-      }}
-    >
-      <CardMedia
-        component="img"
-        image={galleryImages[currentImage].url}
-        alt={galleryImages[currentImage].alt}
-        sx={{
-          width: '100%',
-          height: '100%',
-          objectFit: 'cover',
-          display: 'block',
-        }}
-      />
+      <Box id="gallery" sx={{ bgcolor: '#1a1a1a', color: 'white', py: 10 }}>
+        <Container maxWidth="lg">
+          <Box
+            sx={{
+              position: 'relative',
+              maxWidth: 540,
+              mx: 'auto',
+              aspectRatio: '1080 / 1350',
+              borderRadius: 3,
+              overflow: 'hidden',
+            }}
+          >
+            <CardMedia
+              component="img"
+              image={galleryImages[currentImage].url}
+              alt={galleryImages[currentImage].alt}
+              sx={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                display: 'block',
+              }}
+            />
 
-      {/* Left arrow */}
-      <IconButton
-        onClick={prevImage}
-        sx={{
-          position: 'absolute',
-          left: { xs: 4, sm: 8, md: -60 },
-          top: '50%',
-          transform: 'translateY(-50%)',
-          bgcolor: 'rgba(255,255,255,0.85)',
-          '&:hover': { bgcolor: 'white' },
-          zIndex: 10,
-        }}
-      >
-        <ChevronLeft fontSize={isMobile ? 'medium' : 'large'} />
-      </IconButton>
+            <IconButton
+              onClick={prevImage}
+              sx={{
+                position: 'absolute',
+                left: { xs: 4, sm: 8, md: -60 },
+                top: '50%',
+                transform: 'translateY(-50%)',
+                bgcolor: 'rgba(255,255,255,0.85)',
+                '&:hover': { bgcolor: 'white' },
+                zIndex: 10,
+              }}
+            >
+              <ChevronLeft fontSize={isMobile ? 'medium' : 'large'} />
+            </IconButton>
 
-      {/* Right arrow */}
-      <IconButton
-        onClick={nextImage}
-        sx={{
-          position: 'absolute',
-          right: { xs: 4, sm: 8, md: -60 },
-          top: '50%',
-          transform: 'translateY(-50%)',
-          bgcolor: 'rgba(255,255,255,0.85)',
-          '&:hover': { bgcolor: 'white' },
-          zIndex: 10,
-        }}
-      >
-        <ChevronRight fontSize={isMobile ? 'medium' : 'large'} />
-      </IconButton>
-    </Box>
+            <IconButton
+              onClick={nextImage}
+              sx={{
+                position: 'absolute',
+                right: { xs: 4, sm: 8, md: -60 },
+                top: '50%',
+                transform: 'translateY(-50%)',
+                bgcolor: 'rgba(255,255,255,0.85)',
+                '&:hover': { bgcolor: 'white' },
+                zIndex: 10,
+              }}
+            >
+              <ChevronRight fontSize={isMobile ? 'medium' : 'large'} />
+            </IconButton>
+          </Box>
 
-    {/* Dots */}
-    <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1.5, mt: 4 }}>
-      {galleryImages.map((_, index) => (
-        <Box
-          key={index}
-          onClick={() => setCurrentImage(index)}
-          sx={{
-            width: 14,
-            height: 14,
-            borderRadius: '50%',
-            bgcolor: currentImage === index ? 'white' : 'rgba(255,255,255,0.35)',
-            cursor: 'pointer',
-            transition: 'all 0.25s',
-            '&:hover': { bgcolor: 'rgba(255,255,255,0.7)' },
-          }}
-        />
-      ))}
-    </Box>
-  </Container>
-</Box>
+          <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1.5, mt: 4 }}>
+            {galleryImages.map((_, index) => (
+              <Box
+                key={index}
+                onClick={() => setCurrentImage(index)}
+                sx={{
+                  width: 14,
+                  height: 14,
+                  borderRadius: '50%',
+                  bgcolor: currentImage === index ? 'white' : 'rgba(255,255,255,0.35)',
+                  cursor: 'pointer',
+                  transition: 'all 0.25s',
+                  '&:hover': { bgcolor: 'rgba(255,255,255,0.7)' },
+                }}
+              />
+            ))}
+          </Box>
+        </Container>
+      </Box>
 
-      {/* ─── Footer ─────────────────────────────────────────────────── */}
+      {/* Footer */}
       <Box sx={{ bgcolor: 'white', py: 8 }}>
         <Container>
           <Typography
@@ -396,7 +494,7 @@ useEffect(() => {
             fontWeight="bold"
             sx={{ letterSpacing: 3, color: '#333' }}
           >
-             <Box
+            <Box
               component="img"
               src={logo}
               alt="Purpose Barbershop Logo"
