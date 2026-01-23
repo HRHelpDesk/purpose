@@ -19,7 +19,7 @@ export default function PurposeAuth() {
 
 const clientId = "sq0idp-_5H1iRJA-t5ybiDXb-UElQ";
 const redirectUri = process.env.NODE_ENV === 'production'
-  ? "https://yourdomain.com/api/square/oauth/callback"
+  ? "https://bosscrowns-api-a228488a1e46.herokuapp.com/api/square/oauth/callback"
   : "http://localhost:3000/api/square/oauth/callback";
 
 const authUrl =

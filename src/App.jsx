@@ -12,7 +12,7 @@ const router = createBrowserRouter(
       element: <BarbershopLanding />,
     },
     {
-      path: '/squire-auth',
+      path: '/square-auth',
       element: <SquireAuth />,
     },
     {

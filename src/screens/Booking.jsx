@@ -45,9 +45,9 @@ const BARBERS_DATA = [
     barberId: null,
     locationId: "LE76VA057CZF6",
     image: "https://images-prod-1.getsquire.com/81ef238a-fee9-4e1c-85b6-1f121ed56500_avatar.png",
-    bookingSystem: "square",
-    bookingUrl: "https://book.squareup.com/appointments/o7otj164cepcv3/staff/???/services",
-    availability: "Available Tomorrow"
+    bookingSystem: "booksy",
+    bookingUrl: "http://fadedbyro.booksy.com/a/",
+    availability: ""
   },
   {
     id: 3,
