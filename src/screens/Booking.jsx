@@ -62,11 +62,11 @@ const BARBERS_DATA = [
   {
     id: 4,
     name: "Josue R.",
-    barberId: null,
-    locationId: "LE76VA057CZF6",
+    barberId: 'TMeh-EUcG7oeWhe_',
+    locationId: "LQPKFCWAPBF2F",
     image: "https://images-prod-1.getsquire.com/00ff3773-dbd2-43db-a916-02180e6750a1_avatar.png",
     bookingSystem: "square",
-    bookingUrl: "https://book.squareup.com/appointments/o7otj164cepcv3/staff/???/services",
+    bookingUrl: "https://book.squareup.com/appointments/cyfw7zxck2ka6b/location/LQPKFCWAPBF2F/services?buttonTextColor=000000&color=f3dbb2&locale=en&referrer=so",
     availability: "Available Tomorrow"
   }
 ];
@@ -214,6 +214,8 @@ const BarbershopBooking = () => {
         if (!dbBarber) return { ...local };
         return { ...local, ...dbBarber };
       });
+
+      console.log(mergedBarbers)
 
       const availabilityRes = await fetch(API_AVAILABILITY, {
         method: 'POST',

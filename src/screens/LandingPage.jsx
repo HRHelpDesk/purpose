@@ -24,6 +24,10 @@ import {
   ChevronRight,
 } from '@mui/icons-material';
 
+import {
+  AccountCircle,
+} from '@mui/icons-material';
+
 import MenuIcon from '@mui/icons-material/Menu';
 import CloseIcon from '@mui/icons-material/Close';
 import Drawer from '@mui/material/Drawer';
@@ -42,6 +46,7 @@ import gallery8 from '../assets/images/gallery/8.jpeg'
 import gallery9 from '../assets/images/gallery/9.jpeg'
 import gallery10 from '../assets/images/gallery/10.jpeg'
 import { Link } from 'react-router-dom';
+
 
 
 const navItems = [
@@ -486,23 +491,91 @@ export default function BarbershopLanding() {
       </Box>
 
       {/* Footer */}
-      <Box sx={{ bgcolor: 'white', py: 8 }}>
-        <Container>
-          <Typography
-            variant="h5"
-            align="center"
-            fontWeight="bold"
-            sx={{ letterSpacing: 3, color: '#333' }}
-          >
-            <Box
-              component="img"
-              src={logo}
-              alt="Purpose Barbershop Logo"
-              sx={{ height: { xs: 48, sm: 56, md: 85 }, maxWidth: '100%', objectFit: 'contain' }}
-            />
-          </Typography>
-        </Container>
-      </Box>
+<Box sx={{ bgcolor: 'white', py: 8 }}>
+  <Container>
+    {/* Logo (keeping your original) */}
+    <Typography
+      variant="h5"
+      align="center"
+      fontWeight="bold"
+      sx={{ letterSpacing: 3, color: '#333', mb: 4 }}
+    >
+      <Box
+        component="img"
+        src={logo}
+        alt="Purpose Barbershop Logo"
+        sx={{ height: { xs: 48, sm: 56, md: 85 }, maxWidth: '100%', objectFit: 'contain' }}
+      />
+    </Typography>
+
+    {/* Small icon row — similar style to hero social icons */}
+    <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2.5, mt: 2 }}>
+      {/* Instagram */}
+      {/* <IconButton
+        component="a"
+        href="https://www.instagram.com/purpose__barber.tattoo?igsh=MWE1bWN0dDFwN3h2ZA%3D%3D&utm_source=qr"
+        target="_blank"
+        rel="noopener noreferrer"
+        sx={{ color: '#333', bgcolor: 'rgba(0,0,0,0.06)', '&:hover': { bgcolor: 'rgba(0,0,0,0.12)' } }}
+        size="small"
+      >
+        <Instagram fontSize="small" />
+      </IconButton> */}
+
+      {/* Facebook */}
+      {/* <IconButton
+        component="a"
+        href="https://www.facebook.com/share/19cfUwoHes/?mibextid=wwXIfr"
+        target="_blank"
+        rel="noopener noreferrer"
+        sx={{ color: '#333', bgcolor: 'rgba(0,0,0,0.06)', '&:hover': { bgcolor: 'rgba(0,0,0,0.12)' } }}
+        size="small"
+      >
+        <Facebook fontSize="small" />
+      </IconButton> */}
+
+      {/* TikTok (keeping your custom SVG) */}
+      {/* <IconButton
+        component="a"
+        href="https://www.tiktok.com/@purpose_barbershoptattoo?_t=ZP-8v2jpkbg16c&_r=1"
+        target="_blank"
+        rel="noopener noreferrer"
+        sx={{ color: '#333', bgcolor: 'rgba(0,0,0,0.06)', '&:hover': { bgcolor: 'rgba(0,0,0,0.12)' } }}
+        size="small"
+      >
+        <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M21 8.06c-1.75.02-3.49-.57-4.93-1.69v7.48c0 3.36-2.73 6.1-6.1 6.1-3.36 0-6.1-2.74-6.1-6.1 0-3.36 2.74-6.1 6.1-6.1.31 0 .61.02.91.07v3.3c-.3-.08-.6-.12-.91-.12-1.53 0-2.77 1.25-2.77 2.77 0 1.53 1.24 2.77 2.77 2.77s2.77-1.24 2.77-2.77V2h3.23c.24 2.16 1.96 3.91 4.11 4.17v1.89z"/>
+        </svg>
+      </IconButton> */}
+
+      {/* Email */}
+      {/* <IconButton
+        component="a"
+        href="mailto:swaycutz2323@yahoo.com"
+        sx={{ color: '#333', bgcolor: 'rgba(0,0,0,0.06)', '&:hover': { bgcolor: 'rgba(0,0,0,0.12)' } }}
+        size="small"
+      >
+        <Mail fontSize="small" />
+      </IconButton> */}
+
+      {/* New Profile / Auth icon */}
+      <IconButton
+        component={Link}
+        to="/square-auth"
+        sx={{ color: '#333', bgcolor: 'rgba(0,0,0,0.06)', '&:hover': { bgcolor: 'rgba(0,0,0,0.12)' } }}
+        size="small"
+        title="Profile / Login"
+      >
+        <AccountCircle fontSize="small" />
+      </IconButton>
     </Box>
+
+    {/* Optional: small copyright or extra text */}
+    <Typography variant="body2" align="center" sx={{ mt: 4, color: 'text.secondary' }}>
+      © {new Date().getFullYear()} Purpose Barbershop & Tattoo Studio
+    </Typography>
+  </Container>
+</Box>
+</Box>
   );
 }
