@@ -15,6 +15,7 @@ import {
 } from '@mui/material';
 import { ContentCut as ScissorsIcon, Refresh as RefreshIcon } from '@mui/icons-material';
 import logo from '../assets/purpose_logo.png';
+import { Link } from 'react-router-dom';
 
 // Default BARBERS_DATA
 const BARBERS_DATA = [
@@ -295,12 +296,14 @@ const BarbershopBooking = () => {
     <Box sx={{ minHeight: '100vh', width: '100%', bgcolor: '#fafafa', display: 'flex', flexDirection: 'column' }}>
       <AppBar position="static" elevation={0} sx={{ bgcolor: 'white', borderBottom: '1px solid #e0e0e0' }}>
         <Toolbar sx={{ justifyContent: 'center', py: 1.5 }}>
+          <Link to="/">
           <Box
             component="img"
             src={logo}
             alt="Purpose Barbershop Logo"
             sx={{ height: { xs: 48, sm: 56, md: 64 }, maxWidth: '100%', objectFit: 'contain' }}
           />
+          </Link>
         </Toolbar>
       </AppBar>
 
