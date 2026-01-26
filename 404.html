@@ -3,12 +3,23 @@
   <head>
     <meta charset="utf-8" />
     <title>Redirecting...</title>
-    <script>
-      const redirectTo = location.pathname
-        .replace('/purpose', '')
-        .replace(/^\/+/, '');
 
-      location.replace('/purpose/?redirect=' + redirectTo);
+    <script>
+      const l = window.location;
+      const repo = '/purpose';
+
+      // Redirect preserving path & query
+      l.replace(
+        l.protocol +
+          '//' +
+          l.hostname +
+          (l.port ? ':' + l.port : '') +
+          repo +
+          '/?p=' +
+          l.pathname.replace(repo + '/', '') +
+          '&q=' +
+          l.search.slice(1)
+      );
     </script>
   </head>
   <body></body>
