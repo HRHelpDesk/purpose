@@ -1,25 +1,17 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <meta charset="utf-8" />
+    <meta charset="utf-8">
     <title>Redirecting...</title>
+    <script type="text/javascript">
+      // Get full path after repo base
+      const repoBase = '/purpose';
+      const pathname = window.location.pathname;
 
-    <script>
-      const l = window.location;
-      const repo = '/purpose';
-
-      // Redirect preserving path & query
-      l.replace(
-        l.protocol +
-          '//' +
-          l.hostname +
-          (l.port ? ':' + l.port : '') +
-          repo +
-          '/?p=' +
-          l.pathname.replace(repo + '/', '') +
-          '&q=' +
-          l.search.slice(1)
-      );
+      // If the path is not root, replace location with index.html and keep path intact
+      if (pathname !== repoBase && pathname !== repoBase + '/') {
+        window.location.replace(repoBase + '/index.html' + window.location.search + window.location.hash);
+      }
     </script>
   </head>
   <body></body>
