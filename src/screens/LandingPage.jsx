@@ -14,6 +14,7 @@ import {
   useTheme,
   useMediaQuery,
   Link as MuiLink,
+  Fab,
 } from '@mui/material';
 import {
   Instagram,
@@ -197,6 +198,25 @@ export default function BarbershopLanding() {
               {item.label}
             </Button>
           ))}
+
+          <Button
+fullWidth
+component={Link}
+to="/booking"
+onClick={toggleDrawer} // close drawer after click
+sx={{
+mt: 2,
+bgcolor: '#ffeb3b', // brand color
+color: 'black',
+fontWeight: 'bold',
+fontSize: '1.1rem',
+py: 1.5,
+borderRadius: 2,
+'&:hover': { bgcolor: '#fdd835' },
+}}
+>
+Book Now
+</Button>
         </Box>
       </Drawer>
 
@@ -575,6 +595,28 @@ export default function BarbershopLanding() {
       © {new Date().getFullYear()} Purpose Barbershop & Tattoo Studio
     </Typography>
   </Container>
+  <Link to="/booking" style={{ textDecoration: 'none' }}>
+<Fab
+variant="extended"
+sx={{
+position: 'fixed',
+bottom: 50,
+right: 24,
+zIndex: 1500,
+bgcolor: '#ffeb3b', // adjust brand color
+color: 'black',
+'&:hover': { bgcolor: '#fdd835' },
+boxShadow: 3,
+px: 3,
+py: 1.5,
+fontWeight: 'bold',
+fontSize: '1rem',
+borderRadius: '12px !important',
+}}
+>
+Book Now
+</Fab>
+</Link>
 </Box>
 </Box>
   );
