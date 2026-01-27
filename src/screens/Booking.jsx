@@ -72,6 +72,12 @@ const BARBERS_DATA = [
   }
 ];
 
+const BARBER_PRIORITY = {
+"Mizi": 1,
+"Josue R.": 2,
+"Corbin G.": 3
+};
+
 const API_BARBERS = 'https://bosscrowns-api-a228488a1e46.herokuapp.com/purpose/barbers';
 const API_AVAILABILITY = 'https://bosscrowns-api-a228488a1e46.herokuapp.com/purpose/availability';
 
@@ -236,12 +242,23 @@ const BarbershopBooking = () => {
         };
       });
 
-      updatedBarbers.sort((a, b) => {
-        if (a.isAnyBarber) return -1;
-        if (b.isAnyBarber) return 1;
-        if (a._sortDate !== b._sortDate) return a._sortDate - b._sortDate;
-        return a.name.localeCompare(b.name);
-      });
+     updatedBarbers.sort((a, b) => {
+  // Always keep "Any Professional" first
+  if (a.isAnyBarber) return -1;
+  if (b.isAnyBarber) return 1;
+
+  // Primary sort: soonest availability
+  if (a._sortDate !== b._sortDate) return a._sortDate - b._sortDate;
+
+  // Secondary sort: preferred barber order
+  const aPriority = BARBER_PRIORITY[a.name] ?? 99;
+  const bPriority = BARBER_PRIORITY[b.name] ?? 99;
+
+  if (aPriority !== bPriority) return aPriority - bPriority;
+
+  // Final fallback: alphabetical
+  return a.name.localeCompare(b.name);
+});
 
       updatedBarbers = updatedBarbers.map(({ _sortDate, ...rest }) => rest);
 
@@ -269,12 +286,37 @@ const BarbershopBooking = () => {
   };
 
   // Find the best (soonest) barber for "Any Professional" redirect
-  const getBestBarberForAny = () => {
-    // Exclude "Any Professional" itself
-    const availableBarbers = barbers.filter(b => !b.isAnyBarber);
-    if (availableBarbers.length === 0) return null;
-    return availableBarbers[0]; // already sorted → first one is the best
+ const getBestBarberForAny = () => {
+  // Exclude "Any Professional"
+  const availableBarbers = barbers.filter(b => !b.isAnyBarber);
+
+  if (availableBarbers.length === 0) return null;
+
+  // Barbers available today
+  const todayBarbers = availableBarbers.filter(
+    b => b.availability === "Available Today"
+  );
+
+  // Helper: weighted random (first barber has priority)
+  const weightedPick = (list) => {
+    if (list.length === 0) return null;
+    if (list.length === 1) return list[0];
+
+    // 50% chance to pick first, 50% random among rest
+    if (Math.random() < 0.5) return list[0];
+
+    const rest = list.slice(1);
+    return rest[Math.floor(Math.random() * rest.length)];
   };
+
+  // Case 1 → Someone available today
+  if (todayBarbers.length > 0) {
+    return weightedPick(todayBarbers);
+  }
+
+  // Case 2 → Nobody today → fully random among all barbers
+  return availableBarbers[Math.floor(Math.random() * availableBarbers.length)];
+};
 
   const handleCardClick = (barber) => {
     if (barber.isAnyBarber) {
