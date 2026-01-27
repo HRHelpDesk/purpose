@@ -6,18 +6,16 @@ import {
   CardActionArea,
   Avatar,
   Grid,
-  CircularProgress,
   Alert,
-  Button,
   Skeleton,
   AppBar,
   Toolbar
 } from '@mui/material';
-import { ContentCut as ScissorsIcon, Refresh as RefreshIcon } from '@mui/icons-material';
+import { ContentCut as ScissorsIcon } from '@mui/icons-material';
 import logo from '../assets/purpose_logo.png';
 import { Link } from 'react-router-dom';
 
-// Default BARBERS_DATA
+// Default BARBERS_DATA (fallback in case API fails)
 const BARBERS_DATA = [
   {
     id: 0,
@@ -67,30 +65,15 @@ const BARBERS_DATA = [
     locationId: "LQPKFCWAPBF2F",
     image: "https://images-prod-1.getsquire.com/00ff3773-dbd2-43db-a916-02180e6750a1_avatar.png",
     bookingSystem: "square",
-    bookingUrl: "https://book.squareup.com/appointments/cyfw7zxck2ka6b/location/LQPKFCWAPBF2F/services?buttonTextColor=000000&color=f3dbb2&locale=en&referrer=so",
+    bookingUrl: "https://book.squareup.com/appointments/cyfw7zxck2ka6b/location/LQPKFCWAPBF2F/services",
     availability: "Available Tomorrow"
   }
 ];
 
-const BARBER_PRIORITY = {
-"Mizi": 1,
-"Josue R.": 2,
-"Corbin G.": 3
-};
-
 const API_BARBERS = 'https://bosscrowns-api-a228488a1e46.herokuapp.com/purpose/barbers';
 const API_AVAILABILITY = 'https://bosscrowns-api-a228488a1e46.herokuapp.com/purpose/availability';
 
-const getAvailabilitySortValue = (dateString) => {
-  if (!dateString) return Infinity;
-  try {
-    const slotDate = new Date(dateString + "T00:00:00-06:00");
-    return slotDate.getTime();
-  } catch {
-    return Infinity;
-  }
-};
-
+// --- Barber card component ---
 const BarberCard = ({ barber, onClick }) => (
   <Card
     elevation={0}
@@ -103,10 +86,7 @@ const BarberCard = ({ barber, onClick }) => (
       transition: 'all 0.2s ease',
       '&:hover': { boxShadow: '0 8px 24px rgba(0,0,0,0.12)' },
       mx: 'auto',
-      '@media (max-width: 599px)': {
-        width: '100%',
-        height: 240,
-      },
+      '@media (max-width: 599px)': { width: '100%', height: 240 },
     }}
   >
     <CardActionArea
@@ -149,6 +129,7 @@ const BarberCard = ({ barber, onClick }) => (
   </Card>
 );
 
+// --- Loading card ---
 const LoadingCard = () => (
   <Card
     elevation={0}
@@ -159,10 +140,7 @@ const LoadingCard = () => (
       border: '1px solid #e0e0e0',
       borderRadius: '16px',
       overflow: 'hidden',
-      '@media (max-width: 599px)': {
-        width: '100%',
-        height: 240,
-      },
+      '@media (max-width: 599px)': { width: '100%', height: 240 },
     }}
   >
     <Box
@@ -189,24 +167,9 @@ const BarbershopBooking = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    fetchBarbersAndAvailability();
-  }, []);
+  useEffect(() => { fetchBarbersAndAvailability(); }, []);
 
-  const formatAvailability = (dateString) => {
-    if (!dateString) return "Click to Book";
-    const slotDate = new Date(dateString + "T00:00:00-06:00");
-    const now = new Date();
-    const centralNow = new Date(now.toLocaleString("en-US", { timeZone: "America/Chicago" }));
-    const today = new Date(centralNow); today.setHours(0,0,0,0);
-    const tomorrow = new Date(today); tomorrow.setDate(today.getDate() + 1);
-    const slot = new Date(slotDate); slot.setHours(0,0,0,0);
-
-    if (slot.getTime() === today.getTime()) return "Available Today";
-    if (slot.getTime() === tomorrow.getTime()) return "Available Tomorrow";
-    return `Available ${slot.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", timeZone: "America/Chicago" })}`;
-  };
-
+  // --- Fetch barbers + availability ---
   const fetchBarbersAndAvailability = async () => {
     try {
       setLoading(true);
@@ -216,14 +179,13 @@ const BarbershopBooking = () => {
       if (!barbersRes.ok) throw new Error('Failed to fetch barbers');
       const barbersData = await barbersRes.json();
 
+      // Merge with default data
       const mergedBarbers = BARBERS_DATA.map(local => {
         const dbBarber = barbersData.find(b => b.barberId === local.barberId);
-        if (!dbBarber) return { ...local };
-        return { ...local, ...dbBarber };
+        return dbBarber ? { ...local, ...dbBarber } : { ...local };
       });
 
-      console.log(mergedBarbers)
-
+      // Fetch availability
       const availabilityRes = await fetch(API_AVAILABILITY, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -232,104 +194,75 @@ const BarbershopBooking = () => {
       if (!availabilityRes.ok) throw new Error('Failed to fetch availability');
       const availabilityData = await availabilityRes.json();
 
-      let updatedBarbers = mergedBarbers.map(barber => {
+      // Combine availability
+      const updatedBarbers = mergedBarbers.map(barber => {
         const avail = availabilityData.find(a => a.id === barber.id);
-        const nextSlotDate = avail?.nextSlotDate;
         return {
           ...barber,
-          availability: formatAvailability(nextSlotDate),
-          _sortDate: getAvailabilitySortValue(nextSlotDate),
+          availability: avail?.nextSlotDateTime
+            ? formatAvailability(avail.nextSlotDateTime)
+            : barber.availability || 'Click to Book',
+          _sortDate: avail?._sortDate ?? Infinity,
         };
       });
 
-     updatedBarbers.sort((a, b) => {
-  // Always keep "Any Professional" first
-  if (a.isAnyBarber) return -1;
-  if (b.isAnyBarber) return 1;
-
-  // Primary sort: soonest availability
-  if (a._sortDate !== b._sortDate) return a._sortDate - b._sortDate;
-
-  // Secondary sort: preferred barber order
-  const aPriority = BARBER_PRIORITY[a.name] ?? 99;
-  const bPriority = BARBER_PRIORITY[b.name] ?? 99;
-
-  if (aPriority !== bPriority) return aPriority - bPriority;
-
-  // Final fallback: alphabetical
-  return a.name.localeCompare(b.name);
-});
-
-      updatedBarbers = updatedBarbers.map(({ _sortDate, ...rest }) => rest);
+      // Sort barbers: Any Professional first, then earliest availability
+      updatedBarbers.sort((a, b) => {
+        if (a.isAnyBarber) return -1;
+        if (b.isAnyBarber) return 1;
+        return a._sortDate - b._sortDate;
+      });
 
       setBarbers(updatedBarbers);
-
     } catch (err) {
       console.error(err);
       setError(err.message);
-
-      let fallbackBarbers = BARBERS_DATA.map(b => ({
-        ...b,
-        availability: 'Click to Book'
-      }));
-
-      fallbackBarbers.sort((a, b) => {
-        if (a.isAnyBarber) return -1;
-        if (b.isAnyBarber) return 1;
-        return a.name.localeCompare(b.name);
-      });
-
+      const fallbackBarbers = BARBERS_DATA.map(b => ({ ...b, _sortDate: Infinity }));
+      fallbackBarbers.sort((a, b) => (a.isAnyBarber ? -1 : b.isAnyBarber ? 1 : a.name.localeCompare(b.name)));
       setBarbers(fallbackBarbers);
     } finally {
       setLoading(false);
     }
   };
 
-  // Find the best (soonest) barber for "Any Professional" redirect
- const getBestBarberForAny = () => {
-  // Exclude "Any Professional"
-  const availableBarbers = barbers.filter(b => !b.isAnyBarber);
+  // --- Format date nicely ---
+  const formatAvailability = (dateString) => {
+    const slotDate = new Date(dateString);
+    const centralSlot = new Date(slotDate.toLocaleString('en-US', { timeZone: 'America/Chicago' }));
 
-  if (availableBarbers.length === 0) return null;
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+    const tomorrow = new Date(today); tomorrow.setDate(today.getDate() + 1);
 
-  // Barbers available today
-  const todayBarbers = availableBarbers.filter(
-    b => b.availability === "Available Today"
-  );
+    const slotDay = new Date(centralSlot); slotDay.setHours(0, 0, 0, 0);
+    const timeStr = centralSlot.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
 
-  // Helper: weighted random (first barber has priority)
-  const weightedPick = (list) => {
-    if (list.length === 0) return null;
-    if (list.length === 1) return list[0];
+    if (slotDay.getTime() === today.getTime()) return `Today at ${timeStr}`;
+    if (slotDay.getTime() === tomorrow.getTime()) return `Tomorrow at ${timeStr}`;
 
-    // 50% chance to pick first, 50% random among rest
-    if (Math.random() < 0.5) return list[0];
-
-    const rest = list.slice(1);
-    return rest[Math.floor(Math.random() * rest.length)];
+    const dateStr = centralSlot.toLocaleDateString('en-US', {
+      weekday: 'short', month: 'short', day: 'numeric', timeZone: 'America/Chicago'
+    });
+    return `${dateStr} at ${timeStr}`;
   };
 
-  // Case 1 → Someone available today
-  if (todayBarbers.length > 0) {
-    return weightedPick(todayBarbers);
-  }
+  // --- Any Professional logic ---
+  const getBestBarberForAny = () => {
+    const availableBarbers = barbers.filter(b => !b.isAnyBarber && b._sortDate !== Infinity);
+    if (!availableBarbers.length) return null;
 
-  // Case 2 → Nobody today → fully random among all barbers
-  return availableBarbers[Math.floor(Math.random() * availableBarbers.length)];
-};
+    const earliestTime = Math.min(...availableBarbers.map(b => b._sortDate));
+    const earliestBarbers = availableBarbers.filter(b => b._sortDate === earliestTime);
 
+    const randomIndex = Math.floor(Math.random() * earliestBarbers.length);
+    return earliestBarbers[randomIndex];
+  };
+
+  // --- Handle card click ---
   const handleCardClick = (barber) => {
     if (barber.isAnyBarber) {
       const bestBarber = getBestBarberForAny();
-      if (bestBarber && bestBarber.bookingUrl) {
-        // Go to the soonest barber's booking page
-        window.open(bestBarber.bookingUrl, '_blank', 'noopener,noreferrer');
-      } else {
-        // Fallback to generic services page
-        window.open(barber.bookingUrl, '_blank', 'noopener,noreferrer');
-      }
+      window.open(bestBarber?.bookingUrl || barber.bookingUrl, '_blank', 'noopener,noreferrer');
     } else {
-      // Normal barber → direct booking
       window.open(barber.bookingUrl, '_blank', 'noopener,noreferrer');
     }
   };
@@ -339,12 +272,8 @@ const BarbershopBooking = () => {
       <AppBar position="static" elevation={0} sx={{ bgcolor: 'white', borderBottom: '1px solid #e0e0e0' }}>
         <Toolbar sx={{ justifyContent: 'center', py: 1.5 }}>
           <Link to="/">
-          <Box
-            component="img"
-            src={logo}
-            alt="Purpose Barbershop Logo"
-            sx={{ height: { xs: 48, sm: 56, md: 64 }, maxWidth: '100%', objectFit: 'contain' }}
-          />
+            <Box component="img" src={logo} alt="Purpose Barbershop Logo"
+              sx={{ height: { xs: 48, sm: 56, md: 64 }, maxWidth: '100%', objectFit: 'contain' }} />
           </Link>
         </Toolbar>
       </AppBar>
@@ -370,18 +299,6 @@ const BarbershopBooking = () => {
                   </Grid>
                 ))}
           </Grid>
-
-          {/* <Box display="flex" justifyContent="center" mt={4}>
-            <Button
-              variant="contained"
-              size="large"
-              disabled={loading}
-              startIcon={loading ? <CircularProgress size={20} /> : <RefreshIcon />}
-              onClick={fetchBarbersAndAvailability}
-            >
-              {loading ? 'Refreshing…' : 'Refresh Availability'}
-            </Button>
-          </Box> */}
         </Box>
       </Box>
     </Box>
