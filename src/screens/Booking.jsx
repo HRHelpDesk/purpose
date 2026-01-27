@@ -30,16 +30,16 @@ const BARBERS_DATA = [
     availability: "Book with any professional",
     isAnyBarber: true
   },
-  // {
-  //   id: 1,
-  //   name: "Corbin G.",
-  //   barberId: null,
-  //   locationId: "LE76VA057CZF6",
-  //   image: "https://images-prod-1.getsquire.com/0a31323c-56e7-438d-87a0-23d39ccc0760_img_3875.jpeg",
-  //   bookingSystem: "square",
-  //   bookingUrl: "https://book.squareup.com/appointments/o7otj164cepcv3/staff/???/services",
-  //   availability: "Available Today"
-  // },
+  {
+    id: 1,
+    name: "Corbin G.",
+    barberId: "TMVp9-D0Ok8VNSG3",
+    locationId: "L9BXM93MWKDWV",
+    image: "https://images-prod-1.getsquire.com/0a31323c-56e7-438d-87a0-23d39ccc0760_img_3875.jpeg",
+    bookingSystem: "square",
+    bookingUrl: "https://book.squareup.com/appointments/gyyzmxyy4pepfr/location/L9BXM93MWKDWV/services",
+    availability: "Available Today"
+  },
   {
     id: 2,
     name: "Romelia",
